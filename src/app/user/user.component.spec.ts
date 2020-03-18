@@ -7,35 +7,51 @@ describe('UserComponent', () => {
   let component: UserComponent;
   let fixture: ComponentFixture<UserComponent>;
   let userService: UserService;
+  let userServiceStub: Partial<UserService>;
+  let el;
 
   beforeEach(async(() => {
+    userServiceStub = {
+      isLoggedIn: true,
+      user: { 
+        name: 'Uladzimir'
+      }
+    };
+
     TestBed.configureTestingModule({
       declarations: [UserComponent],
-      providers: [UserService]
+      providers: [ {provide: UserService, useValue: userServiceStub } ]
     });
+
     fixture = TestBed.createComponent(UserComponent);
     component = fixture.componentInstance;
-    component.ngOnInit();
+
     userService = TestBed.get(UserService);
-    fixture.detectChanges();
+
+    el = fixture.nativeElement.querySelector('.welcome');
   }));
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('it should use the user name from the service', () => {
-    expect(userService.user.name).toEqual(component.user.name);
+  it('stub object and injected UserService should not be the same', () => {
+    expect(userServiceStub === userService).toBe(false);
+    userServiceStub.isLoggedIn = false;
+    expect(userService.isLoggedIn).toBe(true);
   });
 
-  // it('should display the user name is user is logged in', () => {
-  //   let compiled = fixture.debugElement.nativeElement;
-  //   component.isLoggedIn = true;
-  //   expect(compiled.querySelector('p').textContent).toContain(component.user.name);
-  // });
+  it('should welcome "Uladzimir"', () => {
+    userService.isLoggedIn = true;
+    fixture.detectChanges();
+    expect(el.textContent).toContain('Uladzimir');
+  });
 
-  // it('should\'t display the user name is user is not logged in', () => {
-  //   let compiled = fixture.debugElement.nativeElement;
-  //   expect(compiled.querySelector('p').textContent).not.toContain(component.user.name);
-  // });
+  it('should request login if not logged in', () => {
+    userService.isLoggedIn = false;
+    fixture.detectChanges();
+    const content = el.textContent;
+    expect(content).not.toContain('Welcome', 'not welcomed');
+    expect(content).toMatch(/log in/i, '"log in"');
+  });
 });

@@ -5,17 +5,16 @@ import { UserService } from './user.service';
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
-  styleUrls: ['./user.component.scss'],
-  providers: [UserService]
+  styleUrls: ['./user.component.scss']
 })
 export class UserComponent implements OnInit {
-  user: {name: string};
-  isLoggedIn = false;
+  welcome: string;
 
   constructor(private userService: UserService) { }
 
   ngOnInit() {
-    this.user = this.userService.user;
+    this.welcome = this.userService.isLoggedIn ?
+      'Welcome, ' + this.userService.user.name : 'Please log in.';
   }
 
 }
