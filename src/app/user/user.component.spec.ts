@@ -1,13 +1,15 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import { UserComponent } from './user.component';
 import { UserService } from './user.service';
+import { DataService } from '../shared/data.service';
 
 describe('UserComponent', () => {
   let component: UserComponent;
   let fixture: ComponentFixture<UserComponent>;
   let userService: UserService;
   let userServiceStub: Partial<UserService>;
+  let dataService: DataService;
   let el;
 
   beforeEach(async(() => {
@@ -20,13 +22,17 @@ describe('UserComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [UserComponent],
-      providers: [ {provide: UserService, useValue: userServiceStub } ]
+      providers: [ 
+        {provide: UserService, useValue: userServiceStub },
+        DataService
+      ]
     });
 
     fixture = TestBed.createComponent(UserComponent);
     component = fixture.componentInstance;
 
     userService = TestBed.get(UserService);
+    dataService = TestBed.get(DataService);
 
     el = fixture.nativeElement.querySelector('.welcome');
   }));
@@ -42,9 +48,10 @@ describe('UserComponent', () => {
   });
 
   it('should welcome "Uladzimir"', () => {
-    userService.isLoggedIn = true;
     fixture.detectChanges();
-    expect(el.textContent).toContain('Uladzimir');
+    const content = el.textContent;
+    expect(content).toContain('Welcome', '"Welcome ..."');
+    expect(content).toContain('Uladzimir');
   });
 
   it('should request login if not logged in', () => {
@@ -54,4 +61,18 @@ describe('UserComponent', () => {
     expect(content).not.toContain('Welcome', 'not welcomed');
     expect(content).toMatch(/log in/i, '"log in"');
   });
+
+  it('should not fetch data successfully if not called asynchronously', () => {
+    spyOn(dataService, 'getDetales').and.returnValue(Promise.resolve('Data'));
+    fixture.detectChanges();
+    expect(component.data).toBe(undefined);
+  });
+
+  it('should fetch data successfully if called asynchronously', fakeAsync(() => {
+    spyOn(dataService, 'getDetales').and.returnValue(Promise.resolve('Data'));
+    fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
+    expect(component.data).toBe('Data');
+  }));
 });
