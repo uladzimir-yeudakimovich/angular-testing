@@ -69,10 +69,16 @@ describe('UserComponent', () => {
   });
 
   it('should fetch data successfully if called asynchronously', fakeAsync(() => {
-    spyOn(dataService, 'getDetales').and.returnValue(Promise.resolve('Data'));
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
+    let testPromise = new Promise((resolve) => {
+        setTimeout(() => {
+            resolve('Data');
+        }, 1500);
+    });
+    testPromise.then((result: string) => {
+      component.data = result;
+    });
+    expect(component.data).toBe(undefined);
+    tick(1500);
     expect(component.data).toBe('Data');
   }));
 });
