@@ -68,11 +68,27 @@ describe('UserComponent', () => {
     expect(component.data).toBe(undefined);
   });
 
+  it('should fetch data successfully if called asynchronously', async(() => {
+    let testPromise = new Promise((resolve) => {
+      setTimeout(() => {
+        resolve('Data');
+      }, 1500);
+    });
+    testPromise.then((result: string) => {
+      component.data = result;
+    });
+    expect(component.data).toBe(undefined);
+    fixture.detectChanges();
+    fixture.whenStable().then(() => {
+      expect(component.data).toBe('Data');
+    });
+  }));
+
   it('should fetch data successfully if called asynchronously', fakeAsync(() => {
     let testPromise = new Promise((resolve) => {
-        setTimeout(() => {
-            resolve('Data');
-        }, 1500);
+      setTimeout(() => {
+        resolve('Data');
+      }, 1500);
     });
     testPromise.then((result: string) => {
       component.data = result;
